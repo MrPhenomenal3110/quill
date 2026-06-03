@@ -83,7 +83,7 @@ export function CommentsSection({ postId, initialComments, currentUserId }: Prop
   };
 
   return (
-    <section className="mt-12">
+    <section id="comments" className="mt-12 scroll-mt-20">
       <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold">
         <MessageCircle className="size-5" />
         {comments.length} {comments.length === 1 ? "comment" : "comments"}

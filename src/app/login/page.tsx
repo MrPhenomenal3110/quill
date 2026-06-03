@@ -1,10 +1,15 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 
 type SearchParams = Promise<{ next?: string; error?: string }>;
 
-export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -16,10 +21,20 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md flex-col items-center justify-center px-6 py-12">
+    <div className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-md flex-col items-center justify-center px-6 py-12">
+      <Image
+        src="/quill.jpeg"
+        alt="Quill"
+        width={72}
+        height={72}
+        priority
+        className="mb-6 rounded-2xl shadow-sm"
+      />
       <div className="w-full rounded-xl border bg-card p-6 shadow-sm sm:p-8">
         <div className="mb-6 space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome to Quill</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Welcome to Quill
+          </h1>
           <p className="text-sm text-muted-foreground">
             Sign in to write posts and join the conversation.
           </p>
@@ -34,7 +49,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
         <GoogleSignInButton next={params.next ?? "/"} />
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          You can read and like posts without signing in. Sign in to publish and comment.
+          You can read and like posts without signing in. Sign in to publish and
+          comment.
         </p>
       </div>
     </div>

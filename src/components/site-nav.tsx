@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { PenSquare, LogIn } from "lucide-react";
+import Image from "next/image";
+import { PenSquare } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
+import { NavSignInButton } from "@/components/nav-sign-in-button";
 
 export async function SiteNav() {
   const supabase = await createSupabaseServerClient();
@@ -23,8 +25,15 @@ export async function SiteNav() {
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="text-lg">Quill</span>
+        <Link href="/" aria-label="Quill home" className="flex items-center">
+          <Image
+            src="/quill.jpeg"
+            alt="Quill"
+            width={40}
+            height={40}
+            className="rounded-md"
+            priority
+          />
         </Link>
 
         <nav className="flex items-center gap-2">
@@ -43,12 +52,7 @@ export async function SiteNav() {
               />
             </>
           ) : (
-            <Button asChild size="sm" className="gap-2">
-              <Link href="/login">
-                <LogIn className="size-4" />
-                Sign in
-              </Link>
-            </Button>
+            <NavSignInButton />
           )}
         </nav>
       </div>

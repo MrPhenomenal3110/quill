@@ -8,8 +8,8 @@ import { getPostBySlug, listCommentsForPost } from "@/lib/queries";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LikeButton } from "@/components/like-button";
 import { CommentsSection } from "@/components/comments-section";
+import { PostActionBar } from "@/components/post-action-bar";
 
 type Params = Promise<{ slug: string }>;
 
@@ -116,15 +116,19 @@ export default async function PostPage({ params }: { params: Params }) {
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
 
-      <div className="my-10 flex items-center justify-center">
-        <LikeButton postId={post.id} initialCount={post.like_count} />
-      </div>
-
       <CommentsSection
         postId={post.id}
         initialComments={comments}
         currentUserId={user?.id ?? null}
       />
+
+      <PostActionBar
+        postId={post.id}
+        initialLikeCount={post.like_count}
+        commentCount={comments.length}
+      />
+      {/* Bottom padding so the sticky bar never covers the last comment */}
+      <div aria-hidden className="h-24" />
     </article>
   );
 }
