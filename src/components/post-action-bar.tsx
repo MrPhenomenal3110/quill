@@ -10,6 +10,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 const TOKEN_KEY = "quill_liker_token";
 const LIKED_POSTS_KEY = "quill_liked_posts";
 const COMMENTS_ANCHOR_ID = "comments";
+const COMMENT_TEXTAREA_SELECTOR = "#comments textarea";
 
 function getOrCreateLikerToken(): string {
   if (typeof window === "undefined") return "";
@@ -54,16 +55,23 @@ export function PostActionBar({ postId, initialLikeCount, commentCount }: Props)
     setLiked(getLikedPostIds().has(postId));
   }, [postId]);
 
-  // Fade out the bar when the comments section is in view.
+  // Only hide while the user is actively typing a comment, so the bar doesn't
+  // cover the textarea. Otherwise keep it visible so likes stay accessible.
   useEffect(() => {
-    const target = document.getElementById(COMMENTS_ANCHOR_ID);
-    if (!target) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setHidden(entry.isIntersecting),
-      { threshold: 0, rootMargin: "-80px 0px 0px 0px" },
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.matches?.(COMMENT_TEXTAREA_SELECTOR)) setHidden(true);
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.matches?.(COMMENT_TEXTAREA_SELECTOR)) setHidden(false);
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
   }, []);
 
   const toggleLike = () => {
