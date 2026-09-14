@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Heart } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteNav } from "@/components/site-nav";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,41 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_TITLE = `${SITE_NAME} — ${SITE_TAGLINE}`;
+
 export const metadata: Metadata = {
-  title: "Quill — A modern blogging space",
-  description: "Read, write, and share well-crafted stories.",
+  // Lets every route below express og:image / canonical as a relative path.
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: `%s — ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+};
+
+export const viewport: Viewport = {
+  // `cover` is what makes env(safe-area-inset-*) non-zero, so the sticky action
+  // bar can clear the in-app browser chrome on Instagram, Threads, etc.
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({

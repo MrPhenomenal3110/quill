@@ -133,7 +133,10 @@ export function PostActionBar({ postId, initialLikeCount, commentCount }: Props)
     <div
       aria-hidden={hidden}
       className={cn(
-        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 transition-all duration-300 sm:pb-6",
+        // Safe-area padding keeps the bar clear of in-app browser chrome
+        // (Instagram, Threads) and the iOS home indicator.
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 transition-all duration-300",
+        "pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]",
         hidden && "translate-y-4 opacity-0",
       )}
     >
