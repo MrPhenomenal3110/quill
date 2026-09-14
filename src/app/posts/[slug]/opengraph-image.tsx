@@ -14,7 +14,7 @@ import {
 } from "@/lib/og";
 import { SITE_NAME } from "@/lib/site";
 
-export const alt = `A post on ${SITE_NAME} — tap through to read and like it`;
+export const alt = `A post on ${SITE_NAME} — open the link to read and like it`;
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -22,8 +22,10 @@ export const contentType = "image/png";
 // is slow enough to lose a crawler.
 export const revalidate = 3600;
 
-const HEART_PATH =
-  "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z";
+const LINK_PATHS = [
+  "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
+  "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+];
 
 async function readBrandMark(): Promise<string | null> {
   try {
@@ -186,7 +188,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               </div>
             </div>
 
-            {/* Reads as a button, so the card itself advertises the like. */}
+            {/* The image isn't tappable wherever it lands, so point at the link instead. */}
             <div
               style={{
                 display: "flex",
@@ -197,10 +199,20 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 border: "1px solid rgba(250,250,250,0.18)",
               }}
             >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill={OG_COLORS.heart}>
-                <path d={HEART_PATH} />
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={OG_COLORS.fg}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={LINK_PATHS[0]} />
+                <path d={LINK_PATHS[1]} />
               </svg>
-              <span style={{ fontSize: 32, fontWeight: 600, marginLeft: 16 }}>Tap to like</span>
+              <span style={{ fontSize: 32, fontWeight: 600, marginLeft: 16 }}>Add link here</span>
             </div>
           </div>
         </div>
