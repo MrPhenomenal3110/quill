@@ -135,3 +135,64 @@ function normalizePostRow(row: RawPostRow | Record<string, unknown>): PostWithAu
     like_count,
   };
 }
+
+/** Minimal row behind the shareable OG card — skips the post body entirely. */
+export type PostSocialCard = {
+  title: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  reading_minutes: number | null;
+  published_at: string | null;
+  created_at: string;
+  author: Pick<Profile, "username" | "display_name" | "avatar_url">;
+  like_count: number;
+  comment_count: number;
+};
+
+export async function getPostSocialCard(
+  supabase: SupabaseClient,
+  slug: string,
+): Promise<PostSocialCard | null> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+        title, excerpt, cover_image_url, reading_minutes, published, published_at, created_at,
+        author:profiles!posts_author_id_fkey ( username, display_name, avatar_url ),
+        likes:post_likes ( count ),
+        comments:comments ( count )
+      `,
+    )
+    .eq("slug", slug)
+    .eq("published", true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  const row = data as unknown as {
+    title: string;
+    excerpt: string | null;
+    cover_image_url: string | null;
+    reading_minutes: number | null;
+    published_at: string | null;
+    created_at: string;
+    author:
+      | Pick<Profile, "username" | "display_name" | "avatar_url">
+      | Array<Pick<Profile, "username" | "display_name" | "avatar_url">>;
+    likes: Array<{ count: number }> | null;
+    comments: Array<{ count: number }> | null;
+  };
+
+  return {
+    title: row.title,
+    excerpt: row.excerpt,
+    cover_image_url: row.cover_image_url,
+    reading_minutes: row.reading_minutes,
+    published_at: row.published_at,
+    created_at: row.created_at,
+    author: Array.isArray(row.author) ? row.author[0] : row.author,
+    like_count: row.likes?.[0]?.count ?? 0,
+    comment_count: row.comments?.[0]?.count ?? 0,
+  };
+}

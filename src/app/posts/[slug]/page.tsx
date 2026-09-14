@@ -6,6 +6,7 @@ import { PenSquare } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPostBySlug, listCommentsForPost } from "@/lib/queries";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { SITE_NAME } from "@/lib/site";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CommentsSection } from "@/components/comments-section";
@@ -17,15 +18,34 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const supabase = await createSupabaseServerClient();
   const post = await getPostBySlug(supabase, slug);
-  if (!post || !post.published) return { title: "Post not found" };
+  if (!post || !post.published) {
+    return { title: "Post not found", robots: { index: false, follow: false } };
+  }
+
+  const url = `/posts/${post.slug}`;
+  const description = post.excerpt ?? `A post by ${post.author.display_name} on ${SITE_NAME}.`;
+
   return {
     title: post.title,
-    description: post.excerpt ?? undefined,
+    description,
+    authors: [{ name: post.author.display_name, url: `/authors/${post.author.username}` }],
+    alternates: { canonical: url },
     openGraph: {
-      title: post.title,
-      description: post.excerpt ?? undefined,
-      images: post.cover_image_url ? [post.cover_image_url] : undefined,
       type: "article",
+      url,
+      siteName: SITE_NAME,
+      title: post.title,
+      description,
+      publishedTime: post.published_at ?? post.created_at,
+      modifiedTime: post.updated_at,
+      authors: [post.author.display_name],
+      // og:image is supplied by ./opengraph-image.tsx — leaving `images` unset
+      // here is what lets that file convention win.
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
     },
   };
 }
