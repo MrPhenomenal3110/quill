@@ -19,7 +19,7 @@ export async function createSupabaseServerClient() {
             );
           } catch {
             // Calling `set` from a Server Component is unsupported; safe to ignore
-            // because middleware refreshes the session on each request.
+            // because the proxy refreshes the session on each request.
           }
         },
       },

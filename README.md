@@ -72,10 +72,11 @@ Open http://localhost:3000.
 
 ## How the moving parts fit
 
-- **Auth** lives in `src/lib/supabase/{client,server,middleware}.ts`. The
-  middleware (`src/middleware.ts`) calls `supabase.auth.getUser()` on every
-  request to refresh tokens. Server components read the session via the
-  server client.
+- **Auth** lives in `src/lib/supabase/{client,server,proxy}.ts`. The proxy
+  (`src/proxy.ts`) calls `supabase.auth.getClaims()` to verify the JWT locally
+  and refresh tokens only when they are near expiry. It is a convenience, not a
+  security boundary — every protected page re-verifies with
+  `supabase.auth.getUser()` via the server client.
 - **Editor**: `src/components/editor/Editor.tsx` is a TipTap instance with
   StarterKit, Image, Link, and Placeholder. The toolbar lives in `Toolbar.tsx`.
   Markdown shortcuts (`# `, `## `, `- `, `> `, `` ` ``, etc.) come free with
@@ -92,8 +93,9 @@ Open http://localhost:3000.
 
 ## Notes
 
-- Next.js 16 prints a deprecation warning about `middleware.ts` → `proxy.ts`.
-  Still functional; rename when convenient.
+- Auth in the proxy is capped at a 3s fetch timeout and fails open. Anything
+  slower would stall the response until the platform's 25s limit and return
+  `MIDDLEWARE_INVOCATION_TIMEOUT` (504). Keep the proxy off the network path.
 - Brand icons (Twitter / GitHub / LinkedIn) come from inline SVGs in
   `src/components/brand-icons.tsx` because `lucide-react@1` dropped brand marks.
 - The Supabase types in `src/lib/supabase/types.ts` are hand-rolled; if you
