@@ -4,17 +4,23 @@ import { join } from "node:path";
 import { format } from "date-fns";
 import { getPostSocialCard } from "@/lib/queries";
 import { createSupabaseAnonClient } from "@/lib/supabase/anon";
-import { OG_COLORS, OG_SIZE, fetchImageDataUri, initialsOf, truncate } from "@/lib/og";
+import {
+  CARD_CACHE_HEADERS,
+  OG_COLORS,
+  OG_SIZE,
+  fetchImageDataUri,
+  initialsOf,
+  truncate,
+} from "@/lib/og";
 import { SITE_NAME } from "@/lib/site";
 
 export const alt = `A post on ${SITE_NAME} — tap through to read and like it`;
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
-// Like counts move, but not fast enough to regenerate the card on every crawl.
-export const revalidate = 300;
-
-const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
+// Nothing time-sensitive on the card now, so cache hard — a cold rasterize
+// is slow enough to lose a crawler.
+export const revalidate = 3600;
 
 const HEART_PATH =
   "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z";
@@ -47,9 +53,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const metaLine = [
     published ? format(published, "LLL d, yyyy") : null,
     post?.reading_minutes ? `${post.reading_minutes} min read` : null,
-    post && post.comment_count > 0
-      ? `${compact.format(post.comment_count)} ${post.comment_count === 1 ? "comment" : "comments"}`
-      : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -197,15 +200,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               <svg width="40" height="40" viewBox="0 0 24 24" fill={OG_COLORS.heart}>
                 <path d={HEART_PATH} />
               </svg>
-              <span style={{ fontSize: 34, fontWeight: 700, marginLeft: 14 }}>
-                {compact.format(post?.like_count ?? 0)}
-              </span>
-              <span style={{ fontSize: 26, color: OG_COLORS.muted, marginLeft: 20 }}>Tap to like</span>
+              <span style={{ fontSize: 32, fontWeight: 600, marginLeft: 16 }}>Tap to like</span>
             </div>
           </div>
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, headers: { ...CARD_CACHE_HEADERS } },
   );
 }

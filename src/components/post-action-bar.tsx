@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { Heart, ImageDown, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,15 +41,17 @@ function persistLiked(postId: string, liked: boolean) {
 
 type Props = {
   postId: string;
+  slug: string;
   initialLikeCount: number;
   commentCount: number;
 };
 
-export function PostActionBar({ postId, initialLikeCount, commentCount }: Props) {
+export function PostActionBar({ postId, slug, initialLikeCount, commentCount }: Props) {
   const [count, setCount] = useState(initialLikeCount);
   const [liked, setLiked] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [pending, startTransition] = useTransition();
+  const storyCardRef = useRef<Promise<Blob> | null>(null);
 
   useEffect(() => {
     setLiked(getLikedPostIds().has(postId));
@@ -105,6 +107,45 @@ export function PostActionBar({ postId, initialLikeCount, commentCount }: Props)
     const el = document.getElementById(COMMENTS_ANCHOR_ID);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const storyCardUrl = `/posts/${slug}/story-card`;
+
+  // iOS only honours navigator.share() close to the tap that triggered it, so
+  // start pulling the card on pointerdown to shorten the await in the handler.
+  const prefetchStoryCard = () => {
+    storyCardRef.current ??= fetch(storyCardUrl).then((res) => {
+      if (!res.ok) throw new Error("story card unavailable");
+      return res.blob();
+    });
+  };
+
+  const shareToStory = async () => {
+    prefetchStoryCard();
+
+    // Instagram can't be handed the link sticker programmatically, so put the
+    // URL on the clipboard — pasting into the sticker is then one tap.
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch {
+      // Non-fatal: they can still copy it from the address bar.
+    }
+
+    try {
+      const blob = await storyCardRef.current!;
+      const file = new File([blob], `${slug}-story.png`, { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        toast.success("Link copied — add the link sticker in Instagram");
+        return;
+      }
+    } catch (err) {
+      if ((err as DOMException)?.name === "AbortError") return;
+      storyCardRef.current = null;
+    }
+
+    // Desktop, or a browser without file sharing: open the card to save by hand.
+    window.open(storyCardUrl, "_blank", "noopener,noreferrer");
   };
 
   const share = async () => {
@@ -177,6 +218,18 @@ export function PostActionBar({ postId, initialLikeCount, commentCount }: Props)
         >
           <Share2 className="size-4" />
           <span className="hidden text-sm font-medium sm:inline">Share</span>
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onPointerDown={prefetchStoryCard}
+          onClick={shareToStory}
+          aria-label="Share to your story"
+          className="h-9 gap-1.5 rounded-full px-3"
+        >
+          <ImageDown className="size-4" />
+          <span className="hidden text-sm font-medium sm:inline">Story</span>
         </Button>
       </div>
     </div>

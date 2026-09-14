@@ -145,8 +145,6 @@ export type PostSocialCard = {
   published_at: string | null;
   created_at: string;
   author: Pick<Profile, "username" | "display_name" | "avatar_url">;
-  like_count: number;
-  comment_count: number;
 };
 
 export async function getPostSocialCard(
@@ -158,9 +156,7 @@ export async function getPostSocialCard(
     .select(
       `
         title, excerpt, cover_image_url, reading_minutes, published, published_at, created_at,
-        author:profiles!posts_author_id_fkey ( username, display_name, avatar_url ),
-        likes:post_likes ( count ),
-        comments:comments ( count )
+        author:profiles!posts_author_id_fkey ( username, display_name, avatar_url )
       `,
     )
     .eq("slug", slug)
@@ -180,8 +176,6 @@ export async function getPostSocialCard(
     author:
       | Pick<Profile, "username" | "display_name" | "avatar_url">
       | Array<Pick<Profile, "username" | "display_name" | "avatar_url">>;
-    likes: Array<{ count: number }> | null;
-    comments: Array<{ count: number }> | null;
   };
 
   return {
@@ -192,7 +186,5 @@ export async function getPostSocialCard(
     published_at: row.published_at,
     created_at: row.created_at,
     author: Array.isArray(row.author) ? row.author[0] : row.author,
-    like_count: row.likes?.[0]?.count ?? 0,
-    comment_count: row.comments?.[0]?.count ?? 0,
   };
 }

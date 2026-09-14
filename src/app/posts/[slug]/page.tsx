@@ -144,6 +144,7 @@ export default async function PostPage({ params }: { params: Params }) {
 
       <PostActionBar
         postId={post.id}
+        slug={post.slug}
         initialLikeCount={post.like_count}
         commentCount={comments.length}
       />

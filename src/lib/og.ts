@@ -1,5 +1,16 @@
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
+/** Instagram/WhatsApp story frame. */
+export const STORY_SIZE = { width: 1080, height: 1920 } as const;
+
+/**
+ * Generated cards are expensive to rasterize, so let the CDN hold them and
+ * serve stale copies while revalidating. Crawlers time out on cold renders.
+ */
+export const CARD_CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=604800",
+} as const;
+
 /** Hex equivalents of the app's dark theme — satori can't parse `oklch()`. */
 export const OG_COLORS = {
   bg: "#0A0A0A",

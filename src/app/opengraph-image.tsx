@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { OG_COLORS, OG_SIZE } from "@/lib/og";
+import { CARD_CACHE_HEADERS, OG_COLORS, OG_SIZE } from "@/lib/og";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
 export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`;
@@ -46,6 +46,6 @@ export default async function Image() {
         </span>
       </div>
     ),
-    { ...size },
+    { ...size, headers: { ...CARD_CACHE_HEADERS } },
   );
 }
