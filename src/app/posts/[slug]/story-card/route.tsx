@@ -16,8 +16,10 @@ import { SITE_NAME } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const HEART_PATH =
-  "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z";
+const LINK_PATHS = [
+  "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
+  "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+];
 
 /**
  * 1080x1920 card sized for an Instagram story. The bottom ~300px is left
@@ -154,7 +156,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
             <span style={{ fontSize: 34, fontWeight: 600 }}>{authorName}</span>
           </div>
 
-          {/* The sticker is the real tap target, so the pill points at it. */}
+          {/* The sticker is the real tap target, so the pill points at where it goes. */}
           <div
             style={{
               display: "flex",
@@ -167,12 +169,20 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
               border: "1px solid rgba(250,250,250,0.20)",
             }}
           >
-            <svg width="46" height="46" viewBox="0 0 24 24" fill={OG_COLORS.heart}>
-              <path d={HEART_PATH} />
+            <svg
+              width="46"
+              height="46"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={OG_COLORS.fg}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d={LINK_PATHS[0]} />
+              <path d={LINK_PATHS[1]} />
             </svg>
-            <span style={{ fontSize: 36, fontWeight: 600, marginLeft: 20 }}>
-              Tap the link to like
-            </span>
+            <span style={{ fontSize: 36, fontWeight: 600, marginLeft: 20 }}>Add link here</span>
           </div>
         </div>
       </div>
